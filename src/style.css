@@ -7,3 +7,15 @@
 #mainDiv {
   border: solid black 3px;
 }
+
+#canvasDiv {
+  border: solid black 3px;
+  width: 256px;
+  height: 256px;
+  margin: 20px;
+}
+
+#canvas {
+  width: 256px;
+  height: 256px;
+}

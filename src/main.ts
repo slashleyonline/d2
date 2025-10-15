@@ -10,11 +10,18 @@ mainDiv.innerHTML = `
   <p>Example image asset: <img src="${exampleIconUrl}" class="icon" /></p>
 `;
 
+const canvasDiv = document.createElement("div");
+canvasDiv.id = "canvasDiv";
+
+mainDiv.appendChild(canvasDiv);
+
 const canvas = document.createElement("canvas");
 
-mainDiv.appendChild(canvas);
+canvas.id = "canvas";
+
+canvasDiv.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
 
-ctx.fillStyle = "green";
-ctx.fillRect(0, 0, 256, 256);
+ctx.fillStyle = "blue";
+ctx.fillRect(0, 0, 300, 150);
