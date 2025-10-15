@@ -1,7 +1,6 @@
 import exampleIconUrl from "./noun-paperclip-7598668-00449F.png";
 import "./style.css";
 
-
 const mainDiv = document.createElement("div");
 mainDiv.id = "mainDiv";
 
