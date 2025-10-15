@@ -3,3 +3,7 @@
   vertical-align: top;
   border: 1px solid salmon;
 }
+
+#mainDiv {
+  border: solid black 3px;
+}
