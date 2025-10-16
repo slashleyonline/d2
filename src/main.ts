@@ -15,7 +15,7 @@ canvas.height = 256;
 canvasDiv.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
-ctx.fillStyle = "blue";
+ctx.fillStyle = "white";
 ctx.fillRect(0, 0, 256, 256);
 
 const mouseCursor = { active: false, x: 0, y: 0 };
