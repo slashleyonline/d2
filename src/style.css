@@ -13,9 +13,11 @@
   width: 256px;
   height: 256px;
   margin: 20px;
+  border-radius: 10%;
 }
 
 #canvas {
   width: 256px;
   height: 256px;
+  border-radius: 10%;
 }
