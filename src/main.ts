@@ -10,10 +10,33 @@ mainDiv.appendChild(canvasDiv);
 
 const canvas = document.createElement("canvas");
 canvas.id = "canvas";
+canvas.width = 256;
+canvas.height = 256;
 canvasDiv.appendChild(canvas);
 
-
 const ctx = canvas.getContext("2d")!;
-
 ctx.fillStyle = "blue";
-ctx.fillRect(0, 0, 300, 150);
+ctx.fillRect(0, 0, 256, 256);
+
+const mouseCursor = { active: false, x: 0, y: 0 };
+
+canvas.addEventListener("mousedown", (e) => {
+  mouseCursor.active = true;
+  mouseCursor.x = e.offsetX;
+  mouseCursor.y = e.offsetY;
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (mouseCursor.active) {
+    ctx.beginPath();
+    ctx.moveTo(mouseCursor.x, mouseCursor.y);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    mouseCursor.x = e.offsetX;
+    mouseCursor.y = e.offsetY;
+  }
+});
+
+canvas.addEventListener("mouseup", () => {
+  mouseCursor.active = false;
+});
