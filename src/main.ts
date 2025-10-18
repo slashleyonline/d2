@@ -26,12 +26,13 @@ interface Stroke {
   positions: Array<{ x: number; y: number }>;
 }
 
-const currentStroke: Stroke = { positions: [] };
+let currentStroke: Stroke | null = null;
 
 canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
+  currentStroke = { positions: [] };
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -44,7 +45,10 @@ canvas.addEventListener("mousemove", (e) => {
     mouseCursor.y = e.offsetY;
 
     const newPosition = { x: e.offsetX, y: e.offsetY };
-    currentStroke.positions.push(newPosition);
+    //if (currentStroke !== null) {
+    if (currentStroke) {
+      currentStroke.positions.push(newPosition);
+    }
     //console.log("position added: ", newPosition);
 
     const drawingChanged = new Event("drawingChanged");
@@ -53,10 +57,11 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mouseup", () => {
-  positionsArray.push(currentStroke);
-
   console.log("position array added: ", currentStroke);
+
   mouseCursor.active = false;
+  positionsArray.push(currentStroke!);
+  currentStroke = null;
 });
 
 const clearButton = document.createElement("button");
@@ -78,14 +83,22 @@ function redraw(posArr: Array<Stroke>) {
   for (const stroke of posArr) {
     drawLine(stroke);
   }
+  if (currentStroke) {
+    drawLine(currentStroke);
+  }
 }
 
 function drawLine(stroke: Stroke) {
-  const posArray = stroke.positions;
-  for (let i = 1; i < posArray.length; i++) {
+  if (stroke.positions.length > 1) {
+    const posArray = stroke.positions;
+
     ctx.beginPath();
-    ctx.moveTo(posArray[i - 1]!.x, posArray[i - 1]!.y);
-    ctx.lineTo(posArray[i]!.x, posArray[i]!.y);
+    ctx.moveTo(posArray[0]!.x, posArray[0]!.y);
+
+    posArray.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+
     ctx.stroke();
   }
 }
