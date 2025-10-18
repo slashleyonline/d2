@@ -20,6 +20,10 @@ ctx.fillRect(0, 0, 256, 256);
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
+const positionsArray: Array<Array<{ x: number; y: number }>> = [];
+const currentStroke: Array<{ x: number; y: number }> = [];
+
+
 canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
   mouseCursor.x = e.offsetX;
@@ -34,10 +38,20 @@ canvas.addEventListener("mousemove", (e) => {
     ctx.stroke();
     mouseCursor.x = e.offsetX;
     mouseCursor.y = e.offsetY;
+
+    const newPosition = { x: e.offsetX, y: e.offsetY };
+    currentStroke.push(newPosition);
+    //console.log("position added: ", newPosition);
+
+    const drawingChanged = new Event("drawingChanged");
+    canvas.dispatchEvent(drawingChanged);
   }
 });
 
 canvas.addEventListener("mouseup", () => {
+  positionsArray.push(currentStroke);
+  //console.log("position array added: ", currentStroke);
+  currentStroke.length = 0; // Clear current stroke
   mouseCursor.active = false;
 });
 
@@ -46,6 +60,10 @@ clearButton.id = "clearButton";
 clearButton.textContent = "Clear";
 mainDiv.appendChild(clearButton);
 
-clearButton.addEventListener("click", (e) => {
+clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+canvas.addEventListener("drawingChanged", () => {
+  console.log("Drawing changed event detected.");
 });
