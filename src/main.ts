@@ -23,7 +23,6 @@ const mouseCursor = { active: false, x: 0, y: 0 };
 const positionsArray: Array<Array<{ x: number; y: number }>> = [];
 const currentStroke: Array<{ x: number; y: number }> = [];
 
-
 canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
   mouseCursor.x = e.offsetX;
@@ -66,4 +65,5 @@ clearButton.addEventListener("click", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
