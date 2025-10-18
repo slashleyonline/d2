@@ -14,20 +14,6 @@ canvas.width = 256;
 canvas.height = 256;
 canvasDiv.appendChild(canvas);
 
-const ctx = canvas.getContext("2d")!;
-ctx.fillStyle = "white";
-ctx.fillRect(0, 0, 256, 256);
-
-const mouseCursor = { active: false, x: 0, y: 0 };
-
-const positionsArray: Array<Stroke> = [];
-
-interface Stroke {
-  positions: Array<{ x: number; y: number }>;
-}
-
-let currentStroke: Stroke | null = null;
-
 canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
   mouseCursor.x = e.offsetX;
@@ -64,6 +50,15 @@ canvas.addEventListener("mouseup", () => {
   currentStroke = null;
 });
 
+canvas.addEventListener("drawingChanged", () => {
+  console.log("Drawing changed event detected.");
+  redraw(positionsArray);
+});
+
+const ctx = canvas.getContext("2d")!;
+ctx.fillStyle = "white";
+ctx.fillRect(0, 0, 256, 256);
+
 const clearButton = document.createElement("button");
 clearButton.id = "clearButton";
 clearButton.textContent = "Clear";
@@ -73,10 +68,44 @@ clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-canvas.addEventListener("drawingChanged", () => {
-  console.log("Drawing changed event detected.");
-  redraw(positionsArray);
+const undoButton = document.createElement("button");
+undoButton.id = "undoButton";
+undoButton.textContent = "Undo";
+mainDiv.appendChild(undoButton);
+
+const positionsArray: Array<Stroke> = [];
+
+const tempUndoArray: Array<Stroke> = [];
+
+undoButton.addEventListener("click", () => {
+  if (positionsArray.length > 0) {
+    tempUndoArray.push(positionsArray[positionsArray.length - 1]!);
+    positionsArray.pop();
+    redraw(positionsArray);
+  }
 });
+
+const redoButton = document.createElement("button");
+redoButton.id = "redoButton";
+redoButton.textContent = "Redo";
+mainDiv.appendChild(redoButton);
+
+redoButton.addEventListener("click", () => {
+  if (tempUndoArray.length > 0) {
+    positionsArray.push(tempUndoArray[tempUndoArray.length - 1]!);
+    tempUndoArray.pop();
+    redraw(positionsArray);
+  }
+  //console.log("Redo button clicked - functionality not implemented.");
+});
+
+const mouseCursor = { active: false, x: 0, y: 0 };
+
+interface Stroke {
+  positions: Array<{ x: number; y: number }>;
+}
+
+let currentStroke: Stroke | null = null;
 
 function redraw(posArr: Array<Stroke>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
