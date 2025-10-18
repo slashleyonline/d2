@@ -20,8 +20,13 @@ ctx.fillRect(0, 0, 256, 256);
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
-const positionsArray: Array<Array<{ x: number; y: number }>> = [];
-const currentStroke: Array<{ x: number; y: number }> = [];
+const positionsArray: Array<Stroke> = [];
+
+interface Stroke {
+  positions: Array<{ x: number; y: number }>;
+}
+
+const currentStroke: Stroke = { positions: [] };
 
 canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
@@ -39,7 +44,7 @@ canvas.addEventListener("mousemove", (e) => {
     mouseCursor.y = e.offsetY;
 
     const newPosition = { x: e.offsetX, y: e.offsetY };
-    currentStroke.push(newPosition);
+    currentStroke.positions.push(newPosition);
     //console.log("position added: ", newPosition);
 
     const drawingChanged = new Event("drawingChanged");
@@ -49,8 +54,8 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
   positionsArray.push(currentStroke);
-  //console.log("position array added: ", currentStroke);
-  currentStroke.length = 0; // Clear current stroke
+
+  console.log("position array added: ", currentStroke);
   mouseCursor.active = false;
 });
 
@@ -65,5 +70,22 @@ clearButton.addEventListener("click", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  redraw(positionsArray);
 });
+
+function redraw(posArr: Array<Stroke>) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const stroke of posArr) {
+    drawLine(stroke);
+  }
+}
+
+function drawLine(stroke: Stroke) {
+  const posArray = stroke.positions;
+  for (let i = 1; i < posArray.length; i++) {
+    ctx.beginPath();
+    ctx.moveTo(posArray[i - 1]!.x, posArray[i - 1]!.y);
+    ctx.lineTo(posArray[i]!.x, posArray[i]!.y);
+    ctx.stroke();
+  }
+}
