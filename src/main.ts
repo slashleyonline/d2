@@ -25,27 +25,15 @@ clearButton.id = "clearButton";
 clearButton.textContent = "Clear";
 mainDiv.appendChild(clearButton);
 
-clearButton.addEventListener("click", () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  positionsArray.length = 0;
-  tempUndoArray.length = 0;
-});
-
 const undoButton = document.createElement("button");
 undoButton.id = "undoButton";
 undoButton.textContent = "Undo";
 mainDiv.appendChild(undoButton);
 
-const positionsArray: Array<Stroke> = [];
-
-const tempUndoArray: Array<Stroke> = [];
-
 const redoButton = document.createElement("button");
 redoButton.id = "redoButton";
 redoButton.textContent = "Redo";
 mainDiv.appendChild(redoButton);
-
-const mouseCursor = { active: false, x: 0, y: 0 };
 
 //INTERFACES
 
@@ -53,7 +41,15 @@ interface Stroke {
   positions: Array<{ x: number; y: number }>;
 }
 
+//VARIABLES
+
 let currentStroke: Stroke | null = null;
+
+const mouseCursor = { active: false, x: 0, y: 0 };
+
+const positionsArray: Array<Stroke> = [];
+
+const tempUndoArray: Array<Stroke> = [];
 
 //EVENT LISTENERS
 
@@ -113,6 +109,12 @@ redoButton.addEventListener("click", () => {
     tempUndoArray.pop();
     redraw(positionsArray);
   }
+});
+
+clearButton.addEventListener("click", () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  positionsArray.length = 0;
+  tempUndoArray.length = 0;
 });
 
 //FUNCTIONS
