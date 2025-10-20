@@ -27,6 +27,8 @@ mainDiv.appendChild(clearButton);
 
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  positionsArray.length = 0;
+  tempUndoArray.length = 0;
 });
 
 const undoButton = document.createElement("button");
@@ -59,6 +61,7 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.active = true;
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
+  tempUndoArray.length = 0; // Clear redo stack on new stroke
   currentStroke = { positions: [] };
 });
 
@@ -95,7 +98,6 @@ canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
   redraw(positionsArray);
 });
-
 
 undoButton.addEventListener("click", () => {
   if (positionsArray.length > 0) {
