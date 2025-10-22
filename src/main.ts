@@ -37,23 +37,31 @@ mainDiv.appendChild(redoButton);
 
 //INTERFACES AND CLASSES
 
-interface Stroke {
-  positions: Array<{ x: number; y: number }>;
+interface Drawable {
+  display(ctx: CanvasRenderingContext2D): void;
 }
 
 //VARIABLES
 
-let currentStroke: Stroke | null = null;
+const stroke = (positions: Array<{ x: number; y: number }>): Drawable => ({
+  display(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.moveTo(positions[0]!.x, positions[0]!.y);
+
+    positions.forEach((point) => {
+      ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+  },
+});
+
+let currentStroke: any = null;
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
-const positionsArray: Array<Stroke> = [];
+const renderStack: Array<Drawable> = [];
 
-const ctxArray: Array<CanvasRenderingContext2D> = [];
-
-const ctxRedoArray: Array<CanvasRenderingContext2D> = [];
-
-const tempUndoArray: Array<Stroke> = [];
+const tempUndoArray: Array<Drawable> = [];
 
 //EVENT LISTENERS
 
@@ -62,7 +70,7 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
-  currentStroke = { positions: [] };
+  currentStroke = stroke([]);
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -75,81 +83,54 @@ canvas.addEventListener("mousemove", (e) => {
     mouseCursor.y = e.offsetY;
 
     const newPosition = { x: e.offsetX, y: e.offsetY };
-    //if (currentStroke !== null) {
+
     if (currentStroke) {
       currentStroke.positions.push(newPosition);
-    }
-    //console.log("position added: ", newPosition);
 
-    const drawingChanged = new Event("drawingChanged");
-    canvas.dispatchEvent(drawingChanged);
+      const drawingChanged = new Event("drawingChanged");
+      canvas.dispatchEvent(drawingChanged);
+    }
   }
 });
 
 canvas.addEventListener("mouseup", () => {
-  console.log("position array added: ", currentStroke);
+  //console.log("position array added: ", currentStroke);
 
   mouseCursor.active = false;
-  ctxArray.push(ctx);
-  display(ctx);
-  positionsArray.push(currentStroke!);
+  renderStack.push(currentStroke);
   currentStroke = null;
 });
 
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
-  //redraw(positionsArray);
-  display(ctx);
+  currentStroke.display(ctx);
 });
 
 undoButton.addEventListener("click", () => {
-  if (positionsArray.length > 0) {
-    tempUndoArray.push(positionsArray[positionsArray.length - 1]!);
-    ctxRedoArray.push(ctx);
-
-    positionsArray.pop();
-    ctxArray.pop();
-
-    redraw(positionsArray);
-    if (ctxArray.length > 0) {
-      display(ctxArray[ctxArray.length - 1]!);
-    }
-  }
+  
 });
 
 redoButton.addEventListener("click", () => {
-  if (tempUndoArray.length > 0) {
-    positionsArray.push(tempUndoArray[tempUndoArray.length - 1]!);
-    tempUndoArray.pop();
-    redraw(positionsArray);
-  }
 });
 
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctxArray.length = 0;
-  ctxRedoArray.length = 0;
-  //positionsArray.length = 0;
-  //tempUndoArray.length = 0;
 });
 
 //FUNCTIONS
 
-function display(context: CanvasRenderingContext2D) {
-  ctx.drawImage(context.canvas, 0, 0);
-}
-
-function redraw(posArr: Array<Stroke>) {
+/*
+function redraw(posArr: Array<Drawable>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const stroke of posArr) {
     drawLine(stroke);
   }
-  if (currentStroke) {
-    drawLine(currentStroke);
-  }
-}
+  //if (currentStroke) {
+    //drawLine(currentStroke);
+  //}
+};
 
-function drawLine(stroke: Stroke) {
+function drawLine(stroke: Drawable) {
   if (stroke.positions.length > 1) {
     const posArray = stroke.positions;
 
@@ -163,3 +144,4 @@ function drawLine(stroke: Stroke) {
     ctx.stroke();
   }
 }
+*/
