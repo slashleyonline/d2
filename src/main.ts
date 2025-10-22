@@ -35,7 +35,7 @@ redoButton.id = "redoButton";
 redoButton.textContent = "Redo";
 mainDiv.appendChild(redoButton);
 
-//INTERFACES
+//INTERFACES AND CLASSES
 
 interface Stroke {
   positions: Array<{ x: number; y: number }>;
@@ -48,6 +48,10 @@ let currentStroke: Stroke | null = null;
 const mouseCursor = { active: false, x: 0, y: 0 };
 
 const positionsArray: Array<Stroke> = [];
+
+const ctxArray: Array<CanvasRenderingContext2D> = [];
+
+const ctxRedoArray: Array<CanvasRenderingContext2D> = [];
 
 const tempUndoArray: Array<Stroke> = [];
 
@@ -86,6 +90,8 @@ canvas.addEventListener("mouseup", () => {
   console.log("position array added: ", currentStroke);
 
   mouseCursor.active = false;
+  ctxArray.push(ctx);
+  display(ctx);
   positionsArray.push(currentStroke!);
   currentStroke = null;
 });
@@ -93,13 +99,21 @@ canvas.addEventListener("mouseup", () => {
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
   redraw(positionsArray);
+  display(ctx);
 });
 
 undoButton.addEventListener("click", () => {
   if (positionsArray.length > 0) {
     tempUndoArray.push(positionsArray[positionsArray.length - 1]!);
+    ctxRedoArray.push(ctx);
+
     positionsArray.pop();
+    ctxArray.pop();
+
     redraw(positionsArray);
+    if (ctxArray.length > 0) {
+      display(ctxArray[ctxArray.length - 1]!);
+    }
   }
 });
 
@@ -118,6 +132,10 @@ clearButton.addEventListener("click", () => {
 });
 
 //FUNCTIONS
+
+function display(context: CanvasRenderingContext2D) {
+  ctx.drawImage(context.canvas, 0, 0);
+}
 
 function redraw(posArr: Array<Stroke>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
