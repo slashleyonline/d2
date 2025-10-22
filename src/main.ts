@@ -54,66 +54,50 @@ markerDiv.appendChild(thickButton);
 
 interface Drawable {
   display(ctx: CanvasRenderingContext2D): void;
+  drag(x: number, y: number): void;
+}
+
+interface LineCommandSettings {
   width: number;
   color: string;
 }
 
-interface MarkerLine {
-  coords: { x: number; y: number };
-  drag(x: number, y: number, ctx: CanvasRenderingContext2D): void;
-}
+const lineCommandDefault: LineCommandSettings = {
+  width: 4,
+  color: "black",
+};
 
 //VARIABLES
 
-let markerWidth = 2;
+function createLineCommandDefault(): Drawable {
+  return createLineCommand(lineCommandDefault.width, lineCommandDefault.color);
+}
 
-const currentColor = "black";
+function createLineCommand(widthInput: number, colorInput: string): Drawable {
+  const positions: Array<{ x: number; y: number }> = [];
 
-const drawingLine = (
-  position: { x: number; y: number },
-): MarkerLine => ({
-  coords: position,
-
-  drag(x: number, y: number, ctx: CanvasRenderingContext2D) {
-    console.log("calling drag!");
-    ctx.beginPath();
-    ctx.moveTo(this.coords.x, this.coords.y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    this.coords = { x, y };
-  },
-});
-
-const stroke = (
-  positions: Array<{ x: number; y: number }>,
-  widthInput: number,
-  colorInput: string,
-): Drawable => (
-  {
-    width: widthInput,
-    color: colorInput,
-
+  return {
+    drag(x: number, y: number) {
+      positions.push({ x, y });
+    },
     display(ctx: CanvasRenderingContext2D) {
-      ctx.lineWidth = this.width;
-      ctx.strokeStyle = this.color;
-      if (positions.length > 1) {
-        const newLine = drawingLine(
-          { x: positions[0]!.x, y: positions[0]!.y },
-        );
+      ctx.lineWidth = widthInput;
+      ctx.strokeStyle = colorInput;
 
+      if (positions.length > 1) {
+        ctx.beginPath();
+        ctx.moveTo(positions[0]!.x, positions[0]!.y);
         positions.forEach((point) => {
-          newLine.drag(point.x, point.y, ctx);
+          ctx.lineTo(point.x, point.y);
         });
+
+        ctx.stroke();
       }
     },
-  }
-);
+  };
+}
 
-let currentStroke: {
-  positions: Array<{ x: number; y: number }>;
-  width: number;
-  color: string;
-};
+let currentStroke: Drawable = createLineCommandDefault();
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
@@ -130,7 +114,7 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
-  currentStroke = { positions: [], width: markerWidth, color: currentColor };
+  currentStroke = createLineCommandDefault();
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -141,21 +125,16 @@ canvas.addEventListener("mousemove", (e) => {
     const newPosition = { x: e.offsetX, y: e.offsetY };
 
     if (currentStroke) {
-      currentStroke.positions.push(newPosition);
+      currentStroke.drag(newPosition.x, newPosition.y);
       canvas.dispatchEvent(drawingChanged);
     }
   }
 });
 
 canvas.addEventListener("mouseup", () => {
-  const finalStroke = stroke(
-    currentStroke.positions,
-    currentStroke.width,
-    currentStroke.color,
-  );
   mouseCursor.active = false;
-  renderStack.push(finalStroke);
-  currentStroke = { positions: [], width: markerWidth, color: currentColor };
+  renderStack.push(currentStroke);
+  currentStroke = createLineCommandDefault();
 });
 
 canvas.addEventListener("drawingChanged", () => {
@@ -187,26 +166,18 @@ clearButton.addEventListener("click", () => {
 });
 
 thinButton.addEventListener("click", () => {
-  markerWidth = 2;
+  lineCommandDefault.width = 2;
 });
 
 thickButton.addEventListener("click", () => {
-  markerWidth = 10;
+  lineCommandDefault.width = 10;
 });
 
 //FUNCTIONS
-
 function reRender(stack: Array<Drawable>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const drawable of stack) {
     drawable.display(ctx);
   }
-  if (currentStroke.positions.length > 1) {
-    const activeStroke = stroke(
-      currentStroke.positions,
-      currentStroke.width,
-      currentStroke.color,
-    );
-    activeStroke.display(ctx);
-  }
+  currentStroke.display(ctx);
 }
