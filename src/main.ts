@@ -10,6 +10,11 @@ const canvasDiv = document.createElement("div");
 canvasDiv.id = "canvasDiv";
 mainDiv.appendChild(canvasDiv);
 
+const markerDiv = document.createElement("div");
+markerDiv.id = "markerDiv";
+markerDiv.innerText = "Marker Tools:";
+mainDiv.appendChild(markerDiv);
+
 const canvas = document.createElement("canvas");
 canvas.id = "canvas";
 canvas.width = 256;
@@ -23,17 +28,17 @@ ctx.fillRect(0, 0, 256, 256);
 const clearButton = document.createElement("button");
 clearButton.id = "clearButton";
 clearButton.textContent = "Clear";
-mainDiv.appendChild(clearButton);
+canvasDiv.appendChild(clearButton);
 
 const undoButton = document.createElement("button");
 undoButton.id = "undoButton";
 undoButton.textContent = "Undo";
-mainDiv.appendChild(undoButton);
+canvasDiv.appendChild(undoButton);
 
 const redoButton = document.createElement("button");
 redoButton.id = "redoButton";
 redoButton.textContent = "Redo";
-mainDiv.appendChild(redoButton);
+canvasDiv.appendChild(redoButton);
 
 //INTERFACES AND CLASSES
 
@@ -41,26 +46,50 @@ interface Drawable {
   display(ctx: CanvasRenderingContext2D): void;
 }
 
+interface MarkerLine {
+  coords: { x: number; y: number };
+  width: number;
+  color: string;
+  drag(x: number, y: number, ctx: CanvasRenderingContext2D): void;
+}
+
 //VARIABLES
+
+const drawingLine = (position: { x: number; y: number }): MarkerLine => ({
+  coords: position,
+  width: 1,
+  color: "black",
+  drag(x: number, y: number, ctx: CanvasRenderingContext2D) {
+    console.log("calling drag!");
+    ctx.beginPath();
+    ctx.moveTo(this.coords.x, this.coords.y);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    this.coords = { x, y };
+  },
+});
 
 const stroke = (positions: Array<{ x: number; y: number }>): Drawable => ({
   display(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.moveTo(positions[0]!.x, positions[0]!.y);
+    if (positions.length > 1) {
+      const newLine = drawingLine({ x: positions[0]!.x, y: positions[0]!.y });
 
-    positions.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-    });
-    ctx.stroke();
+      positions.forEach((point) => {
+        newLine.drag(point.x, point.y, ctx);
+      });
+    }
   },
 });
 
 let currentStroke: Array<{ x: number; y: number }>;
+
 const mouseCursor = { active: false, x: 0, y: 0 };
 
 const renderStack: Array<Drawable> = [];
 
 const tempUndoArray: Array<Drawable> = [];
+
+const drawingChanged = new Event("drawingChanged");
 
 //EVENT LISTENERS
 
@@ -69,14 +98,11 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
+  currentStroke = [];
 });
 
 canvas.addEventListener("mousemove", (e) => {
   if (mouseCursor.active) {
-    ctx.beginPath();
-    ctx.moveTo(mouseCursor.x, mouseCursor.y);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
     mouseCursor.x = e.offsetX;
     mouseCursor.y = e.offsetY;
 
@@ -84,15 +110,12 @@ canvas.addEventListener("mousemove", (e) => {
 
     if (currentStroke) {
       currentStroke.push(newPosition);
-
-      const drawingChanged = new Event("drawingChanged");
       canvas.dispatchEvent(drawingChanged);
     }
   }
 });
 
 canvas.addEventListener("mouseup", () => {
-  //console.log("position array added: ", currentStroke);
   const finalStroke = stroke(currentStroke);
   mouseCursor.active = false;
   renderStack.push(finalStroke);
@@ -101,51 +124,41 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
-  reRender();
-  //currentStroke.display(ctx);
+  reRender(renderStack);
 });
 
 undoButton.addEventListener("click", () => {
+  if (renderStack[renderStack.length - 1]) {
+    tempUndoArray.push(renderStack[renderStack.length - 1]!);
+    renderStack.pop();
+    canvas.dispatchEvent(drawingChanged);
+  }
 });
 
 redoButton.addEventListener("click", () => {
+  if (tempUndoArray[tempUndoArray.length - 1]) {
+    renderStack.push(tempUndoArray[tempUndoArray.length - 1]!);
+    tempUndoArray.pop();
+    canvas.dispatchEvent(drawingChanged);
+  }
 });
 
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderStack.length = 0;
+  canvas.dispatchEvent(drawingChanged);
+  tempUndoArray.length = 0;
 });
 
 //FUNCTIONS
 
-function reRender() {
-  for (const drawable of renderStack) {
+function reRender(stack: Array<Drawable>) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const drawable of stack) {
     drawable.display(ctx);
   }
-}
-
-/*
-function redraw(posArr: Array<Drawable>) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (const stroke of posArr) {
-    drawLine(stroke);
-  }
-  //if (currentStroke) {
-    //drawLine(currentStroke);
-  //}
-};
-
-function drawLine(stroke: Drawable) {
-  if (stroke.positions.length > 1) {
-    const posArray = stroke.positions;
-
-    ctx.beginPath();
-    ctx.moveTo(posArray[0]!.x, posArray[0]!.y);
-
-    posArray.forEach((point) => {
-      ctx.lineTo(point.x, point.y);
-    });
-
-    ctx.stroke();
+  if (currentStroke.length > 1) {
+    const activeStroke = stroke(currentStroke);
+    activeStroke.display(ctx);
   }
 }
-*/
