@@ -40,25 +40,40 @@ redoButton.id = "redoButton";
 redoButton.textContent = "Redo";
 canvasDiv.appendChild(redoButton);
 
+const thinButton = document.createElement("button");
+thinButton.id = "thinButton";
+thinButton.textContent = "thin";
+markerDiv.appendChild(thinButton);
+
+const thickButton = document.createElement("button");
+thickButton.id = "thickButton";
+thickButton.textContent = "thick";
+markerDiv.appendChild(thickButton);
+
 //INTERFACES AND CLASSES
 
 interface Drawable {
   display(ctx: CanvasRenderingContext2D): void;
+  width: number;
+  color: string;
 }
 
 interface MarkerLine {
   coords: { x: number; y: number };
-  width: number;
-  color: string;
   drag(x: number, y: number, ctx: CanvasRenderingContext2D): void;
 }
 
 //VARIABLES
 
-const drawingLine = (position: { x: number; y: number }): MarkerLine => ({
+let markerWidth = 2;
+
+const currentColor = "black";
+
+const drawingLine = (
+  position: { x: number; y: number },
+): MarkerLine => ({
   coords: position,
-  width: 1,
-  color: "black",
+
   drag(x: number, y: number, ctx: CanvasRenderingContext2D) {
     console.log("calling drag!");
     ctx.beginPath();
@@ -69,19 +84,36 @@ const drawingLine = (position: { x: number; y: number }): MarkerLine => ({
   },
 });
 
-const stroke = (positions: Array<{ x: number; y: number }>): Drawable => ({
-  display(ctx: CanvasRenderingContext2D) {
-    if (positions.length > 1) {
-      const newLine = drawingLine({ x: positions[0]!.x, y: positions[0]!.y });
+const stroke = (
+  positions: Array<{ x: number; y: number }>,
+  widthInput: number,
+  colorInput: string,
+): Drawable => (
+  {
+    width: widthInput,
+    color: colorInput,
 
-      positions.forEach((point) => {
-        newLine.drag(point.x, point.y, ctx);
-      });
-    }
-  },
-});
+    display(ctx: CanvasRenderingContext2D) {
+      ctx.lineWidth = this.width;
+      ctx.strokeStyle = this.color;
+      if (positions.length > 1) {
+        const newLine = drawingLine(
+          { x: positions[0]!.x, y: positions[0]!.y },
+        );
 
-let currentStroke: Array<{ x: number; y: number }>;
+        positions.forEach((point) => {
+          newLine.drag(point.x, point.y, ctx);
+        });
+      }
+    },
+  }
+);
+
+let currentStroke: {
+  positions: Array<{ x: number; y: number }>;
+  width: number;
+  color: string;
+};
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
@@ -98,7 +130,7 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
-  currentStroke = [];
+  currentStroke = { positions: [], width: markerWidth, color: currentColor };
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -109,17 +141,21 @@ canvas.addEventListener("mousemove", (e) => {
     const newPosition = { x: e.offsetX, y: e.offsetY };
 
     if (currentStroke) {
-      currentStroke.push(newPosition);
+      currentStroke.positions.push(newPosition);
       canvas.dispatchEvent(drawingChanged);
     }
   }
 });
 
 canvas.addEventListener("mouseup", () => {
-  const finalStroke = stroke(currentStroke);
+  const finalStroke = stroke(
+    currentStroke.positions,
+    currentStroke.width,
+    currentStroke.color,
+  );
   mouseCursor.active = false;
   renderStack.push(finalStroke);
-  currentStroke = [];
+  currentStroke = { positions: [], width: markerWidth, color: currentColor };
 });
 
 canvas.addEventListener("drawingChanged", () => {
@@ -150,6 +186,14 @@ clearButton.addEventListener("click", () => {
   tempUndoArray.length = 0;
 });
 
+thinButton.addEventListener("click", () => {
+  markerWidth = 2;
+});
+
+thickButton.addEventListener("click", () => {
+  markerWidth = 10;
+});
+
 //FUNCTIONS
 
 function reRender(stack: Array<Drawable>) {
@@ -157,8 +201,12 @@ function reRender(stack: Array<Drawable>) {
   for (const drawable of stack) {
     drawable.display(ctx);
   }
-  if (currentStroke.length > 1) {
-    const activeStroke = stroke(currentStroke);
+  if (currentStroke.positions.length > 1) {
+    const activeStroke = stroke(
+      currentStroke.positions,
+      currentStroke.width,
+      currentStroke.color,
+    );
     activeStroke.display(ctx);
   }
 }
