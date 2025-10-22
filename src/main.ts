@@ -56,6 +56,26 @@ stickerDiv.id = "stickerDiv";
 stickerDiv.innerText = "Stickers: ";
 mainDiv.appendChild(stickerDiv);
 
+interface stickerType {
+  image: string;
+  title: string;
+}
+
+const stickers: Array<stickerType> = [
+  {
+    image: "🤠",
+    title: "cowboy",
+  },
+  {
+    image: "😢",
+    title: "crying",
+  },
+  {
+    image: "😴",
+    title: "sleepy",
+  },
+];
+
 //INTERFACES AND CLASSES
 
 interface Drawable {
@@ -103,13 +123,13 @@ function createLineCommand(widthInput: number, colorInput: string): Drawable {
   };
 }
 
-function createCursorCommand(x: number, y: number): Drawable {
+function createCursorCommand(x: number, y: number, symbol: string): Drawable {
   const position = { x, y };
   return {
     display(ctx: CanvasRenderingContext2D) {
       ctx.font = "32px monospace";
       ctx.fillStyle = "black";
-      ctx.fillText("*", position.x - 8, position.y + 16);
+      ctx.fillText(symbol, position.x - 8, position.y + 16);
     },
     drag(nx: number, ny: number) {
       position.x = nx;
@@ -143,17 +163,22 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("mouseout", () => {
-  cursorCommand = null;
   canvas.dispatchEvent(cursorChanged);
 });
 
 canvas.addEventListener("mouseenter", (e) => {
-  cursorCommand = createCursorCommand(e.offsetX, e.offsetY);
+  if (!cursorCommand) {
+    cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
+  }
   canvas.dispatchEvent(cursorChanged);
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  cursorCommand = createCursorCommand(e.offsetX, e.offsetY);
+  if (!cursorCommand) {
+    cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
+  }
+  canvas.dispatchEvent(cursorChanged);
+  cursorCommand.drag(e.offsetX, e.offsetY);
   canvas.dispatchEvent(cursorChanged);
 });
 
@@ -213,9 +238,29 @@ thickButton.addEventListener("click", () => {
   lineCommandDefault.width = 10;
 });
 
-canvas.addEventListener("cursorChanged", () => reRender(renderStack));
+canvas.addEventListener("toolMoved", () => reRender(renderStack));
 
 //FUNCTIONS
+
+function stickerSetup(): void {
+  for (const sticker of stickers) {
+    buildHTMLButton(sticker);
+  }
+}
+
+function buildHTMLButton(data: stickerType) {
+  const newButton = document.createElement("button");
+  newButton.id = "stickerButton";
+  newButton.innerText = data.image;
+  newButton.style.fontSize = "50px";
+
+  newButton.addEventListener("click", () => {
+    cursorCommand = createCursorCommand(0, 0, data.image);
+  });
+
+  stickerDiv.appendChild(newButton);
+}
+
 function reRender(stack: Array<Drawable>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const drawable of stack) {
@@ -227,3 +272,5 @@ function reRender(stack: Array<Drawable>) {
     cursorCommand.display(ctx);
   }
 }
+
+stickerSetup();
