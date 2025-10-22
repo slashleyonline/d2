@@ -51,6 +51,11 @@ thickButton.id = "thickButton";
 thickButton.textContent = "thick";
 markerDiv.appendChild(thickButton);
 
+const stickerDiv = document.createElement("div");
+stickerDiv.id = "stickerDiv";
+stickerDiv.innerText = "Stickers: ";
+mainDiv.appendChild(stickerDiv);
+
 //INTERFACES AND CLASSES
 
 interface Drawable {
