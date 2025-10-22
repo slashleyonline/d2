@@ -98,7 +98,7 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   console.log("Drawing changed event detected.");
-  redraw(positionsArray);
+  //redraw(positionsArray);
   display(ctx);
 });
 
@@ -127,8 +127,10 @@ redoButton.addEventListener("click", () => {
 
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  positionsArray.length = 0;
-  tempUndoArray.length = 0;
+  ctxArray.length = 0;
+  ctxRedoArray.length = 0;
+  //positionsArray.length = 0;
+  //tempUndoArray.length = 0;
 });
 
 //FUNCTIONS
