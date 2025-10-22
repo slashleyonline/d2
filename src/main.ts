@@ -118,6 +118,8 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
+  const toolMoved = new Event("toolMoved");
+  canvas.dispatchEvent(toolMoved);
   if (mouseCursor.active) {
     mouseCursor.x = e.offsetX;
     mouseCursor.y = e.offsetY;
@@ -129,6 +131,10 @@ canvas.addEventListener("mousemove", (e) => {
       canvas.dispatchEvent(drawingChanged);
     }
   }
+});
+
+canvas.addEventListener("toolMoved", () => {
+  console.log("tool has been moved on the canvas.");
 });
 
 canvas.addEventListener("mouseup", () => {
