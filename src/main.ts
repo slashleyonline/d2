@@ -103,6 +103,7 @@ function createCursorCommand(x: number, y: number): Drawable {
   return {
     display(ctx: CanvasRenderingContext2D) {
       ctx.font = "32px monospace";
+      ctx.fillStyle = "black";
       ctx.fillText("*", position.x - 8, position.y + 16);
     },
     drag(nx: number, ny: number) {
@@ -124,7 +125,7 @@ const tempUndoArray: Array<Drawable> = [];
 
 const drawingChanged = new Event("drawingChanged");
 
-const cursorChanged = new Event("cursorChanged");
+const cursorChanged = new Event("toolMoved");
 
 //EVENT LISTENERS
 
@@ -136,7 +137,7 @@ canvas.addEventListener("mousedown", (e) => {
   currentStroke = createLineCommandDefault();
 });
 
-canvas.addEventListener("mouseout", (e) => {
+canvas.addEventListener("mouseout", () => {
   cursorCommand = null;
   canvas.dispatchEvent(cursorChanged);
 });
@@ -216,7 +217,6 @@ function reRender(stack: Array<Drawable>) {
     drawable.display(ctx);
   }
   currentStroke.display(ctx);
-
 
   if (cursorCommand) {
     cursorCommand.display(ctx);
