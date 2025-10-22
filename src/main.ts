@@ -19,6 +19,7 @@ const canvas = document.createElement("canvas");
 canvas.id = "canvas";
 canvas.width = 256;
 canvas.height = 256;
+canvas.style.cursor = "none";
 canvasDiv.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
@@ -97,7 +98,23 @@ function createLineCommand(widthInput: number, colorInput: string): Drawable {
   };
 }
 
+function createCursorCommand(x: number, y: number): Drawable {
+  const position = { x, y };
+  return {
+    display(ctx: CanvasRenderingContext2D) {
+      ctx.font = "32px monospace";
+      ctx.fillText("*", position.x - 8, position.y + 16);
+    },
+    drag(nx: number, ny: number) {
+      position.x = nx;
+      position.y = ny;
+    },
+  };
+}
+
 let currentStroke: Drawable = createLineCommandDefault();
+
+let cursorCommand: Drawable | null;
 
 const mouseCursor = { active: false, x: 0, y: 0 };
 
@@ -106,6 +123,8 @@ const renderStack: Array<Drawable> = [];
 const tempUndoArray: Array<Drawable> = [];
 
 const drawingChanged = new Event("drawingChanged");
+
+const cursorChanged = new Event("cursorChanged");
 
 //EVENT LISTENERS
 
@@ -117,9 +136,22 @@ canvas.addEventListener("mousedown", (e) => {
   currentStroke = createLineCommandDefault();
 });
 
+canvas.addEventListener("mouseout", (e) => {
+  cursorCommand = null;
+  canvas.dispatchEvent(cursorChanged);
+});
+
+canvas.addEventListener("mouseenter", (e) => {
+  cursorCommand = createCursorCommand(e.offsetX, e.offsetY);
+  canvas.dispatchEvent(cursorChanged);
+});
+
 canvas.addEventListener("mousemove", (e) => {
-  const toolMoved = new Event("toolMoved");
-  canvas.dispatchEvent(toolMoved);
+  cursorCommand = createCursorCommand(e.offsetX, e.offsetY);
+  canvas.dispatchEvent(cursorChanged);
+});
+
+canvas.addEventListener("mousemove", (e) => {
   if (mouseCursor.active) {
     mouseCursor.x = e.offsetX;
     mouseCursor.y = e.offsetY;
@@ -131,10 +163,6 @@ canvas.addEventListener("mousemove", (e) => {
       canvas.dispatchEvent(drawingChanged);
     }
   }
-});
-
-canvas.addEventListener("toolMoved", () => {
-  console.log("tool has been moved on the canvas.");
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -179,6 +207,8 @@ thickButton.addEventListener("click", () => {
   lineCommandDefault.width = 10;
 });
 
+canvas.addEventListener("cursorChanged", () => reRender(renderStack));
+
 //FUNCTIONS
 function reRender(stack: Array<Drawable>) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -186,4 +216,9 @@ function reRender(stack: Array<Drawable>) {
     drawable.display(ctx);
   }
   currentStroke.display(ctx);
+
+
+  if (cursorCommand) {
+    cursorCommand.display(ctx);
+  }
 }
