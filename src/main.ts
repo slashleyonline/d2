@@ -172,7 +172,7 @@ clearButton.addEventListener("click", () => {
 });
 
 thinButton.addEventListener("click", () => {
-  lineCommandDefault.width = 2;
+  lineCommandDefault.width = 4;
 });
 
 thickButton.addEventListener("click", () => {
