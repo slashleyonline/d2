@@ -141,9 +141,6 @@ canvas.addEventListener("mousedown", (e) => {
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
   cursorCommand = null;
-  if (cursorCommand) {
-    cursorCommand = null;
-  }
   reRender(ctx, renderStack);
 });
 
@@ -207,8 +204,8 @@ redoButton.addEventListener("click", () => {
 clearButton.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   renderStack.length = 0;
-  canvas.dispatchEvent(drawingChanged);
   tempUndoArray.length = 0;
+  canvas.dispatchEvent(drawingChanged);
 });
 
 thinButton.addEventListener("click", () => {
