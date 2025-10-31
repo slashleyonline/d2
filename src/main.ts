@@ -106,7 +106,7 @@ const stickers: Array<stickerType> = [
 
 let selectedSticker: string | null = null;
 
-let currentStroke: Drawable = createLineCommandDefault();
+let currentStroke: Drawable | null = createLineCommandDefault();
 
 let cursorCommand: Drawable | null;
 
@@ -129,19 +129,19 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
+
+  currentStroke = createLineCommandDefault();
   if (selectedSticker) {
     // Create a new sticker command at the click position
     currentStroke = CreateStickerCommand(e.offsetX, e.offsetY, selectedSticker);
-  } else {
-    // Default to drawing a line
-    currentStroke = createLineCommandDefault();
   }
 });
 
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
+  currentStroke = null;
   cursorCommand = null;
-  reRender(ctx, renderStack);
+  canvas.dispatchEvent(drawingChanged);
 });
 
 canvas.addEventListener("mouseenter", (e) => {
@@ -156,6 +156,10 @@ canvas.addEventListener("mouseenter", (e) => {
       cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
       currentCursorIcon = "*";
     }
+  }
+
+  if (!currentStroke) {
+    currentStroke = createLineCommandDefault();
   }
   canvas.dispatchEvent(cursorChanged);
 });
@@ -177,7 +181,7 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
   mouseCursor.active = false;
-  renderStack.push(currentStroke);
+  renderStack.push(currentStroke!);
   canvas.dispatchEvent(drawingChanged);
 });
 
@@ -334,12 +338,13 @@ function buildCustomStickerButton() {
 
 function reRender(context: CanvasRenderingContext2D, stack: Array<Drawable>) {
   context.clearRect(0, 0, canvas.width, canvas.height);
-
+  console.log("new print stack: ", stack.length);
   for (const drawable of stack) {
     drawable.display(context);
   }
-
-  currentStroke.display(context);
+  if (currentStroke) {
+    currentStroke.display(context);
+  }
 
   if (cursorCommand) {
     cursorCommand.display(context);
