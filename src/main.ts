@@ -157,8 +157,6 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mouseup", () => {
   mouseCursor.active = false;
   renderStack.push(currentStroke);
-  //currentStroke = createLineCommandDefault(); // Reset to line
-  //selectedSticker = null; // reset sticker selection after use
   canvas.dispatchEvent(drawingChanged);
 });
 
@@ -190,16 +188,12 @@ clearButton.addEventListener("click", () => {
 });
 
 thinButton.addEventListener("click", () => {
-  cursorCommand = createCursorCommand(0, 0, "*");
-  currentStroke = createLineCommandDefault();
-  selectedSticker = null;
+  revertCursorToDraw();
   lineCommandDefault.width = 4;
 });
 
 thickButton.addEventListener("click", () => {
-  cursorCommand = createCursorCommand(0, 0, "*");
-  currentStroke = createLineCommandDefault();
-  selectedSticker = null;
+  revertCursorToDraw();
   lineCommandDefault.width = 10;
 });
 
@@ -259,15 +253,14 @@ function createCursorCommand(x: number, y: number, symbol: string): Drawable {
     },
   };
 }
-/*
+
 function revertCursorToDraw() {
   cursorCommand = createCursorCommand(0, 0, "*");
   currentStroke = createLineCommandDefault();
   selectedSticker = null;
 }
-*/
+
 function stickerSetup(): void {
-  clearDiv(stickerDiv);
   for (const sticker of stickers) {
     buildStickerButton(sticker);
   }
@@ -301,12 +294,9 @@ function reRender(stack: Array<Drawable>) {
   }
 }
 
-function clearDiv(input: HTMLDivElement) {
-  const removeList = input.children;
-
-  for (const i of removeList) {
-    i.remove();
-  }
+function clearStickerDiv() {
+  stickerDiv.replaceChildren();
+  stickerDiv.innerText = "Stickers: ";
 }
 
 //CALLS
@@ -314,4 +304,5 @@ function clearDiv(input: HTMLDivElement) {
 canvas.addEventListener("toolMoved", () => reRender(renderStack));
 
 stickerSetup();
-//clearDiv(stickerDiv);
+
+clearStickerDiv();
