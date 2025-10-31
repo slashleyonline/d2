@@ -6,6 +6,9 @@
 
 #mainDiv {
   border: solid black 3px;
+  width: 30%;
+  position: absolute;
+  left: 35%;
 }
 
 #canvasDiv {
