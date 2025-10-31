@@ -133,7 +133,6 @@ canvas.addEventListener("mouseout", () => {
 });
 
 canvas.addEventListener("mouseenter", (e) => {
-  console.log("resetting cursor!");
   if (!cursorCommand) {
     cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
   }
@@ -164,7 +163,6 @@ canvas.addEventListener("mouseup", () => {
 });
 
 canvas.addEventListener("drawingChanged", () => {
-  console.log("Drawing changed event detected.");
   reRender(renderStack);
 });
 
@@ -237,7 +235,6 @@ function createLineCommand(widthInput: number, colorInput: string): Drawable {
 
 function CreateStickerCommand(x: number, y: number, symbol: string): Drawable {
   let position = { x, y };
-  console.log("sticker function called!");
   return {
     drag(x: number, y: number) {
       position = { x, y };
@@ -262,7 +259,13 @@ function createCursorCommand(x: number, y: number, symbol: string): Drawable {
     },
   };
 }
-
+/*
+function revertCursorToDraw() {
+  cursorCommand = createCursorCommand(0, 0, "*");
+  currentStroke = createLineCommandDefault();
+  selectedSticker = null;
+}
+*/
 function stickerSetup(): void {
   clearDiv(stickerDiv);
   for (const sticker of stickers) {
