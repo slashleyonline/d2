@@ -56,6 +56,15 @@ stickerDiv.id = "stickerDiv";
 stickerDiv.innerText = "Stickers: ";
 mainDiv.appendChild(stickerDiv);
 
+const exportDiv = document.createElement("div");
+exportDiv.id = "exportDiv";
+mainDiv.appendChild(exportDiv);
+
+const exportButton = document.createElement("button");
+exportButton.textContent = "Export";
+exportButton.style.fontSize = "20px";
+exportDiv.appendChild(exportButton);
+
 //INTERFACES AND CLASSES
 
 interface stickerType {
