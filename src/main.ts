@@ -40,7 +40,6 @@ canvasDiv.appendChild(redoButton);
 
 const thinButton = document.createElement("button");
 thinButton.id = "thinButton";
-thinButton.textContent = "thin";
 markerDiv.appendChild(thinButton);
 
 const thickButton = document.createElement("button");
@@ -59,8 +58,6 @@ mainDiv.appendChild(exportDiv);
 
 const exportButton = document.createElement("button");
 exportButton.id = "exportButton";
-//exportButton.textContent = "Export";
-//exportButton.style.fontSize = "20px";
 exportDiv.appendChild(exportButton);
 
 //INTERFACES AND CLASSES

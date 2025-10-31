@@ -68,3 +68,22 @@
   width: 60px;
   height: 60px;
 }
+
+#thinButton {
+  position: relative;
+
+  background-image: url("thin.png");
+  background-size: 100%;
+  width: 60px;
+  height: 60px;
+}
+#thickButton {
+  position: relative;
+  background-image: url("thick.png");
+  background-size: 100%;
+  width: 60px;
+  height: 60px;
+}
+#markerDiv {
+  display: flex;
+}
