@@ -193,13 +193,15 @@ clearButton.addEventListener("click", () => {
 
 thinButton.addEventListener("click", () => {
   cursorCommand = createCursorCommand(0, 0, "*");
-
+  currentStroke = createLineCommandDefault();
+  selectedSticker = null;
   lineCommandDefault.width = 4;
 });
 
 thickButton.addEventListener("click", () => {
   cursorCommand = createCursorCommand(0, 0, "*");
-
+  currentStroke = createLineCommandDefault();
+  selectedSticker = null;
   lineCommandDefault.width = 10;
 });
 
