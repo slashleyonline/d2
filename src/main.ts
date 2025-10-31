@@ -101,6 +101,8 @@ let currentStroke: Drawable = createLineCommandDefault();
 
 let cursorCommand: Drawable | null;
 
+let currentCursorIcon: string | null;
+
 const mouseCursor = { active: false, x: 0, y: 0 };
 
 const renderStack: Array<Drawable> = [];
@@ -130,11 +132,24 @@ canvas.addEventListener("mousedown", (e) => {
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
   cursorCommand = null;
+  /*
+  if (currentCursorIcon) {
+    //cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "");
+  }*/
 });
 
 canvas.addEventListener("mouseenter", (e) => {
   if (!cursorCommand) {
-    cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
+    if (currentCursorIcon) {
+      cursorCommand = createCursorCommand(
+        e.offsetX,
+        e.offsetY,
+        currentCursorIcon,
+      );
+    } else {
+      cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
+      currentCursorIcon = "*";
+    }
   }
   canvas.dispatchEvent(cursorChanged);
 });
@@ -256,6 +271,7 @@ function createCursorCommand(x: number, y: number, symbol: string): Drawable {
 
 function revertCursorToDraw() {
   cursorCommand = createCursorCommand(0, 0, "*");
+  currentCursorIcon = "*";
   currentStroke = createLineCommandDefault();
   selectedSticker = null;
 }
@@ -276,6 +292,7 @@ function buildStickerButton(data: stickerType) {
   newButton.addEventListener("click", () => {
     cursorCommand = createCursorCommand(0, 0, data.image);
     selectedSticker = data.image;
+    currentCursorIcon = data.image;
   });
 
   stickerDiv.appendChild(newButton);
