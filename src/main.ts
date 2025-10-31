@@ -23,7 +23,7 @@ canvas.style.cursor = "none";
 canvasDiv.appendChild(canvas);
 
 const ctx = canvas.getContext("2d")!;
-ctx.fillStyle = "white";
+ctx.fillStyle = "#ffffff00";
 ctx.fillRect(0, 0, 256, 256);
 
 const clearButton = document.createElement("button");
@@ -121,6 +121,7 @@ const tempUndoArray: Array<Drawable> = [];
 const drawingChanged = new Event("drawingChanged");
 
 const cursorChanged = new Event("toolMoved");
+const mouseupEvent = new Event("mouseup");
 
 //EVENT LISTENERS
 
@@ -129,16 +130,15 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
-
   currentStroke = createLineCommandDefault();
   if (selectedSticker) {
-    // Create a new sticker command at the click position
     currentStroke = CreateStickerCommand(e.offsetX, e.offsetY, selectedSticker);
   }
 });
 
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
+  //canvas.dispatchEvent(mouseupEvent);
   currentStroke = null;
   cursorCommand = null;
   canvas.dispatchEvent(drawingChanged);
@@ -158,9 +158,6 @@ canvas.addEventListener("mouseenter", (e) => {
     }
   }
 
-  if (!currentStroke) {
-    currentStroke = createLineCommandDefault();
-  }
   canvas.dispatchEvent(cursorChanged);
 });
 
@@ -181,7 +178,9 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
   mouseCursor.active = false;
-  renderStack.push(currentStroke!);
+  if (currentStroke) {
+    renderStack.push(currentStroke);
+  }
   canvas.dispatchEvent(drawingChanged);
 });
 
