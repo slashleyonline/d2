@@ -183,6 +183,7 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   reRender(ctx, renderStack);
+  console.log("rerender!");
 });
 
 undoButton.addEventListener("click", () => {
@@ -202,9 +203,11 @@ redoButton.addEventListener("click", () => {
 });
 
 clearButton.addEventListener("click", () => {
+  console.log("clear!");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   renderStack.length = 0;
   tempUndoArray.length = 0;
+  currentStroke = createLineCommandDefault();
   canvas.dispatchEvent(drawingChanged);
 });
 
