@@ -121,7 +121,6 @@ const tempUndoArray: Array<Drawable> = [];
 const drawingChanged = new Event("drawingChanged");
 
 const cursorChanged = new Event("toolMoved");
-const mouseupEvent = new Event("mouseup");
 
 //EVENT LISTENERS
 
