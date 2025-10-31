@@ -264,6 +264,7 @@ function stickerSetup(): void {
   for (const sticker of stickers) {
     buildStickerButton(sticker);
   }
+  buildCustomStickerButton();
 }
 
 function buildStickerButton(data: stickerType) {
@@ -278,6 +279,18 @@ function buildStickerButton(data: stickerType) {
   });
 
   stickerDiv.appendChild(newButton);
+}
+
+function buildCustomStickerButton() {
+  const newCustomButton = document.createElement("button");
+  newCustomButton.id = "customStickerButton";
+  newCustomButton.innerText = "+";
+  newCustomButton.style.fontSize = "50px";
+
+  newCustomButton.addEventListener("click", () => {
+    console.log("test!");
+  });
+  stickerDiv.appendChild(newCustomButton);
 }
 
 function reRender(stack: Array<Drawable>) {
@@ -297,6 +310,7 @@ function reRender(stack: Array<Drawable>) {
 function clearStickerDiv() {
   stickerDiv.replaceChildren();
   stickerDiv.innerText = "Stickers: ";
+  stickerSetup();
 }
 
 //CALLS
