@@ -132,10 +132,10 @@ canvas.addEventListener("mousedown", (e) => {
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
   cursorCommand = null;
-  /*
-  if (currentCursorIcon) {
-    //cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "");
-  }*/
+  if (cursorCommand) {
+    cursorCommand = null;
+  }
+  reRender(renderStack);
 });
 
 canvas.addEventListener("mouseenter", (e) => {
