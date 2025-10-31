@@ -144,7 +144,7 @@ canvas.addEventListener("mouseout", () => {
   if (cursorCommand) {
     cursorCommand = null;
   }
-  reRender(renderStack);
+  reRender(ctx, renderStack);
 });
 
 canvas.addEventListener("mouseenter", (e) => {
@@ -185,7 +185,7 @@ canvas.addEventListener("mouseup", () => {
 });
 
 canvas.addEventListener("drawingChanged", () => {
-  reRender(renderStack);
+  reRender(ctx, renderStack);
 });
 
 undoButton.addEventListener("click", () => {
@@ -219,6 +219,10 @@ thinButton.addEventListener("click", () => {
 thickButton.addEventListener("click", () => {
   revertCursorToDraw();
   lineCommandDefault.width = 10;
+});
+
+exportButton.addEventListener("click", () => {
+  exportImage();
 });
 
 //FUNCTIONS
@@ -328,17 +332,17 @@ function buildCustomStickerButton() {
   stickerDiv.appendChild(newCustomButton);
 }
 
-function reRender(stack: Array<Drawable>) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function reRender(context: CanvasRenderingContext2D, stack: Array<Drawable>) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
   for (const drawable of stack) {
-    drawable.display(ctx);
+    drawable.display(context);
   }
 
-  currentStroke.display(ctx);
+  currentStroke.display(context);
 
   if (cursorCommand) {
-    cursorCommand.display(ctx);
+    cursorCommand.display(context);
   }
 }
 
@@ -348,8 +352,23 @@ function clearStickerDiv() {
   stickerSetup();
 }
 
+function exportImage() {
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = 1024;
+  exportCanvas.height = 1024;
+
+  const exportCTX = exportCanvas.getContext("2d");
+  exportCTX?.scale(4, 4);
+  reRender(exportCTX!, renderStack);
+
+  const anchor = document.createElement("a");
+  anchor.href = exportCanvas.toDataURL("image/png");
+  anchor.download = "sketchpad.png";
+  anchor.click();
+}
+
 //CALLS
 
-canvas.addEventListener("toolMoved", () => reRender(renderStack));
+canvas.addEventListener("toolMoved", () => reRender(ctx, renderStack));
 
 stickerSetup();
