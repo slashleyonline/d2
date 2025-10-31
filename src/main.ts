@@ -288,7 +288,16 @@ function buildCustomStickerButton() {
   newCustomButton.style.fontSize = "50px";
 
   newCustomButton.addEventListener("click", () => {
-    console.log("test!");
+    const newStickerSymbol = prompt("Enter a new symbol for your sticker!");
+    const newStickerName = prompt("What is the sticker's name?");
+    if (newStickerSymbol && newStickerName) {
+      const newSticker: stickerType = {
+        image: newStickerSymbol,
+        title: newStickerName,
+      };
+      stickers.push(newSticker);
+      clearStickerDiv();
+    }
   });
   stickerDiv.appendChild(newCustomButton);
 }
