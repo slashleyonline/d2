@@ -6,17 +6,19 @@
 
 #mainDiv {
   border: solid black 3px;
-  width: 30%;
+  width: 45%;
   position: absolute;
-  left: 35%;
+  left: 25%;
 }
 
 #canvasDiv {
   background-image: url("noteboook.png");
   background-size: 100%;
+  position: relative;
+  left: 20%;
+  margin-top: 20px;
   width: 270px;
   height: 270px;
-  margin: 20px;
   cursor: default;
 }
 
@@ -25,10 +27,33 @@
 }
 
 #markerDiv {
-  margin: 20px;
+  margin-top: 70px;
+  margin-left: 20px;
 }
 
+#stickerDiv {
+  margin-top: 10px;
+  margin-left: 20px;
+}
 #canvas {
   width: 100%;
   height: 100%;
+}
+
+#undoButton {
+  background-image: url("undo.png");
+  width: 50px;
+  height: 50px;
+}
+
+#redoButton {
+  background-image: url("redo.png");
+  width: 50px;
+  height: 50px;
+}
+
+#clearButton {
+  background-image: url("clear.png");
+  width: 50px;
+  height: 50px;
 }

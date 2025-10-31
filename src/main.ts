@@ -28,17 +28,14 @@ ctx.fillRect(0, 0, 256, 256);
 
 const clearButton = document.createElement("button");
 clearButton.id = "clearButton";
-clearButton.textContent = "Clear";
 canvasDiv.appendChild(clearButton);
 
 const undoButton = document.createElement("button");
 undoButton.id = "undoButton";
-undoButton.textContent = "Undo";
 canvasDiv.appendChild(undoButton);
 
 const redoButton = document.createElement("button");
 redoButton.id = "redoButton";
-redoButton.textContent = "Redo";
 canvasDiv.appendChild(redoButton);
 
 const thinButton = document.createElement("button");
