@@ -344,5 +344,3 @@ function clearStickerDiv() {
 canvas.addEventListener("toolMoved", () => reRender(renderStack));
 
 stickerSetup();
-
-clearStickerDiv();
