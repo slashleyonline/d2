@@ -56,27 +56,12 @@ stickerDiv.id = "stickerDiv";
 stickerDiv.innerText = "Stickers: ";
 mainDiv.appendChild(stickerDiv);
 
+//INTERFACES AND CLASSES
+
 interface stickerType {
   image: string;
   title: string;
 }
-
-const stickers: Array<stickerType> = [
-  {
-    image: "🤠",
-    title: "cowboy",
-  },
-  {
-    image: "😢",
-    title: "crying",
-  },
-  {
-    image: "😴",
-    title: "sleepy",
-  },
-];
-
-//INTERFACES AND CLASSES
 
 interface Drawable {
   display(ctx: CanvasRenderingContext2D): void;
@@ -94,6 +79,39 @@ const lineCommandDefault: LineCommandSettings = {
 };
 
 //VARIABLES
+
+const stickers: Array<stickerType> = [
+  {
+    image: "🤠",
+    title: "cowboy",
+  },
+  {
+    image: "😢",
+    title: "crying",
+  },
+  {
+    image: "😴",
+    title: "sleepy",
+  },
+];
+
+let selectedSticker: string | null = null;
+
+let currentStroke: Drawable = createLineCommandDefault();
+
+let cursorCommand: Drawable | null;
+
+const mouseCursor = { active: false, x: 0, y: 0 };
+
+const renderStack: Array<Drawable> = [];
+
+const tempUndoArray: Array<Drawable> = [];
+
+const drawingChanged = new Event("drawingChanged");
+
+const cursorChanged = new Event("toolMoved");
+
+//FUNCTIONS
 
 function createLineCommandDefault(): Drawable {
   return createLineCommand(lineCommandDefault.width, lineCommandDefault.color);
@@ -123,6 +141,19 @@ function createLineCommand(widthInput: number, colorInput: string): Drawable {
   };
 }
 
+function CreateStickerCommand(x: number, y: number, symbol: string): Drawable {
+  let position = { x, y };
+
+  return {
+    drag(x: number, y: number) {
+      position = { x, y };
+    },
+    display(ctx: CanvasRenderingContext2D) {
+      ctx.fillText(symbol, position.x, position.y);
+    },
+  };
+}
+
 function createCursorCommand(x: number, y: number, symbol: string): Drawable {
   const position = { x, y };
   return {
@@ -138,19 +169,37 @@ function createCursorCommand(x: number, y: number, symbol: string): Drawable {
   };
 }
 
-let currentStroke: Drawable = createLineCommandDefault();
+function stickerSetup(): void {
+  for (const sticker of stickers) {
+    buildHTMLButton(sticker);
+  }
+}
 
-let cursorCommand: Drawable | null;
+function buildHTMLButton(data: stickerType) {
+  const newButton = document.createElement("button");
+  newButton.id = "stickerButton";
+  newButton.innerText = data.image;
+  newButton.style.fontSize = "50px";
 
-const mouseCursor = { active: false, x: 0, y: 0 };
+  newButton.addEventListener("click", () => {
+    cursorCommand = createCursorCommand(0, 0, data.image);
+    selectedSticker = data.image;
+  });
 
-const renderStack: Array<Drawable> = [];
+  stickerDiv.appendChild(newButton);
+}
 
-const tempUndoArray: Array<Drawable> = [];
+function reRender(stack: Array<Drawable>) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const drawable of stack) {
+    drawable.display(ctx);
+  }
+  currentStroke.display(ctx);
 
-const drawingChanged = new Event("drawingChanged");
-
-const cursorChanged = new Event("toolMoved");
+  if (cursorCommand) {
+    cursorCommand.display(ctx);
+  }
+}
 
 //EVENT LISTENERS
 
@@ -159,11 +208,18 @@ canvas.addEventListener("mousedown", (e) => {
   mouseCursor.x = e.offsetX;
   mouseCursor.y = e.offsetY;
   tempUndoArray.length = 0; // Clear redo stack on new stroke
-  currentStroke = createLineCommandDefault();
+  if (selectedSticker) {
+    // Create a new sticker command at the click position
+    currentStroke = CreateStickerCommand(e.offsetX, e.offsetY, selectedSticker);
+  } else {
+    // Default to drawing a line
+    currentStroke = createLineCommandDefault();
+  }
 });
 
 canvas.addEventListener("mouseout", () => {
   canvas.dispatchEvent(cursorChanged);
+  cursorCommand = null;
 });
 
 canvas.addEventListener("mouseenter", (e) => {
@@ -174,32 +230,26 @@ canvas.addEventListener("mouseenter", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  if (!cursorCommand) {
-    cursorCommand = createCursorCommand(e.offsetX, e.offsetY, "*");
+  mouseCursor.x = e.offsetX;
+  mouseCursor.y = e.offsetY;
+
+  if (cursorCommand) {
+    cursorCommand.drag(e.offsetX, e.offsetY);
+    canvas.dispatchEvent(cursorChanged);
   }
-  canvas.dispatchEvent(cursorChanged);
-  cursorCommand.drag(e.offsetX, e.offsetY);
-  canvas.dispatchEvent(cursorChanged);
-});
 
-canvas.addEventListener("mousemove", (e) => {
-  if (mouseCursor.active) {
-    mouseCursor.x = e.offsetX;
-    mouseCursor.y = e.offsetY;
-
-    const newPosition = { x: e.offsetX, y: e.offsetY };
-
-    if (currentStroke) {
-      currentStroke.drag(newPosition.x, newPosition.y);
-      canvas.dispatchEvent(drawingChanged);
-    }
+  if (mouseCursor.active && currentStroke) {
+    currentStroke.drag(e.offsetX, e.offsetY);
+    canvas.dispatchEvent(drawingChanged);
   }
 });
 
 canvas.addEventListener("mouseup", () => {
   mouseCursor.active = false;
   renderStack.push(currentStroke);
-  currentStroke = createLineCommandDefault();
+  currentStroke = createLineCommandDefault(); // Reset to line
+  selectedSticker = null; // reset sticker selection after use
+  canvas.dispatchEvent(drawingChanged);
 });
 
 canvas.addEventListener("drawingChanged", () => {
@@ -231,46 +281,17 @@ clearButton.addEventListener("click", () => {
 });
 
 thinButton.addEventListener("click", () => {
+  cursorCommand = createCursorCommand(0, 0, "*");
+
   lineCommandDefault.width = 4;
 });
 
 thickButton.addEventListener("click", () => {
+  cursorCommand = createCursorCommand(0, 0, "*");
+
   lineCommandDefault.width = 10;
 });
 
 canvas.addEventListener("toolMoved", () => reRender(renderStack));
-
-//FUNCTIONS
-
-function stickerSetup(): void {
-  for (const sticker of stickers) {
-    buildHTMLButton(sticker);
-  }
-}
-
-function buildHTMLButton(data: stickerType) {
-  const newButton = document.createElement("button");
-  newButton.id = "stickerButton";
-  newButton.innerText = data.image;
-  newButton.style.fontSize = "50px";
-
-  newButton.addEventListener("click", () => {
-    cursorCommand = createCursorCommand(0, 0, data.image);
-  });
-
-  stickerDiv.appendChild(newButton);
-}
-
-function reRender(stack: Array<Drawable>) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (const drawable of stack) {
-    drawable.display(ctx);
-  }
-  currentStroke.display(ctx);
-
-  if (cursorCommand) {
-    cursorCommand.display(ctx);
-  }
-}
 
 stickerSetup();
