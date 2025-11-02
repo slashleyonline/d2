@@ -333,7 +333,7 @@ function buildCustomStickerButton() {
 }
 
 function addCustomStickerButtonListener(newButton: HTMLButtonElement) {
-  if (newButton.id == "colorButton") {
+  if (newButton.id == "ustomStickerButton") {
     newButton.addEventListener("click", () => {
       const newStickerSymbol = prompt("Enter a new symbol for your sticker!");
       const newStickerName = prompt("What is the sticker's name?");
@@ -389,12 +389,18 @@ function initiateColorDiv() {
     const newColorButtonElement = document.createElement("button");
     newColorButtonElement.id = "colorButton";
     newColorButtonElement.style.backgroundColor = colorName;
-    newColorButtonElement.addEventListener("click", () => {
-      currentLineCommand.color = colorName;
-      enableButtons(colorDiv);
-      newColorButtonElement.disabled = true;
-    });
+    addColorEventListener(newColorButtonElement);
     colorDiv.appendChild(newColorButtonElement);
+  }
+}
+
+function addColorEventListener(newButton: HTMLButtonElement) {
+  if (newButton.id == "colorButton") {
+    newButton.addEventListener("click", () => {
+      currentLineCommand.color = newButton.style.backgroundColor;
+      enableButtons(colorDiv);
+      newButton.disabled = true;
+    });
   }
 }
 
