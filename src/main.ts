@@ -80,7 +80,7 @@ interface LineCommandSettings {
   color: string;
 }
 
-const lineCommandDefault: LineCommandSettings = {
+const currentLineCommand: LineCommandSettings = {
   width: 4,
   color: "black",
 };
@@ -195,7 +195,6 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("drawingChanged", () => {
   reRender(ctx, renderStack);
-  console.log("rerender!");
 });
 
 undoButton.addEventListener("click", () => {
@@ -215,7 +214,6 @@ redoButton.addEventListener("click", () => {
 });
 
 clearButton.addEventListener("click", () => {
-  console.log("clear!");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   renderStack.length = 0;
   tempUndoArray.length = 0;
@@ -225,12 +223,12 @@ clearButton.addEventListener("click", () => {
 
 thinButton.addEventListener("click", () => {
   revertCursorToDraw();
-  lineCommandDefault.width = 4;
+  currentLineCommand.width = 4;
 });
 
 thickButton.addEventListener("click", () => {
   revertCursorToDraw();
-  lineCommandDefault.width = 10;
+  currentLineCommand.width = 10;
 });
 
 exportButton.addEventListener("click", () => {
@@ -240,7 +238,7 @@ exportButton.addEventListener("click", () => {
 //FUNCTIONS
 
 function createLineCommandDefault(): Drawable {
-  return createLineCommand(lineCommandDefault.width, lineCommandDefault.color);
+  return createLineCommand(currentLineCommand.width, currentLineCommand.color);
 }
 
 function createLineCommand(widthInput: number, colorInput: string): Drawable {
@@ -346,7 +344,6 @@ function buildCustomStickerButton() {
 
 function reRender(context: CanvasRenderingContext2D, stack: Array<Drawable>) {
   context.clearRect(0, 0, canvas.width, canvas.height);
-  console.log("new print stack: ", stack.length);
   for (const drawable of stack) {
     drawable.display(context);
   }
@@ -386,7 +383,7 @@ function initiateColorDiv() {
     newColorButtonElement.id = "colorButton";
     newColorButtonElement.style.backgroundColor = colorName;
     newColorButtonElement.addEventListener("click", () => {
-      lineCommandDefault.color = colorName;
+      currentLineCommand.color = colorName;
       enableButtons(colorDiv);
       newColorButtonElement.disabled = true;
     });
