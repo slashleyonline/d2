@@ -322,24 +322,31 @@ function buildStickerButton(data: stickerType) {
 }
 
 function buildCustomStickerButton() {
-  const newCustomButton = document.createElement("button");
-  newCustomButton.id = "customStickerButton";
-  newCustomButton.innerText = "+";
-  newCustomButton.style.fontSize = "50px";
+  const newStickerButton = document.createElement("button");
+  newStickerButton.id = "customStickerButton";
+  newStickerButton.innerText = "+";
+  newStickerButton.style.fontSize = "50px";
 
-  newCustomButton.addEventListener("click", () => {
-    const newStickerSymbol = prompt("Enter a new symbol for your sticker!");
-    const newStickerName = prompt("What is the sticker's name?");
-    if (newStickerSymbol && newStickerName) {
-      const newSticker: stickerType = {
-        image: newStickerSymbol,
-        title: newStickerName,
-      };
-      stickers.push(newSticker);
-      clearStickerDiv();
-    }
-  });
-  stickerDiv.appendChild(newCustomButton);
+  addCustomStickerButtonListener(newStickerButton);
+
+  stickerDiv.appendChild(newStickerButton);
+}
+
+function addCustomStickerButtonListener(newButton: HTMLButtonElement) {
+  if (newButton.id == "colorButton") {
+    newButton.addEventListener("click", () => {
+      const newStickerSymbol = prompt("Enter a new symbol for your sticker!");
+      const newStickerName = prompt("What is the sticker's name?");
+      if (newStickerSymbol && newStickerName) {
+        const newSticker: stickerType = {
+          image: newStickerSymbol,
+          title: newStickerName,
+        };
+        stickers.push(newSticker);
+        clearStickerDiv();
+      }
+    });
+  }
 }
 
 function reRender(context: CanvasRenderingContext2D, stack: Array<Drawable>) {
