@@ -6,9 +6,9 @@
 
 #mainDiv {
   border: solid black 3px;
-  width: 45%;
+  width: 20%;
   position: absolute;
-  left: 25%;
+  left: 30%;
 }
 
 #canvasDiv {
@@ -86,4 +86,8 @@
 }
 #markerDiv {
   display: flex;
+}
+
+#colorDiv {
+  margin: 5%;
 }

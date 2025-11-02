@@ -44,8 +44,11 @@ markerDiv.appendChild(thinButton);
 
 const thickButton = document.createElement("button");
 thickButton.id = "thickButton";
-thickButton.textContent = "thick";
 markerDiv.appendChild(thickButton);
+
+const colorDiv = document.createElement("div");
+colorDiv.id = "colorDiv";
+mainDiv.appendChild(colorDiv);
 
 const stickerDiv = document.createElement("div");
 stickerDiv.id = "stickerDiv";
@@ -97,6 +100,18 @@ const stickers: Array<stickerType> = [
     image: "😴",
     title: "sleepy",
   },
+];
+
+const colors = [
+  "black",
+  "white",
+  "red",
+  "blue",
+  "green",
+  "yellow",
+  "pink",
+  "purple",
+  "orange",
 ];
 
 let selectedSticker: string | null = null;
@@ -365,8 +380,32 @@ function exportImage() {
   anchor.click();
 }
 
+function initiateColorDiv() {
+  for (const colorName of colors) {
+    const newColorButtonElement = document.createElement("button");
+    newColorButtonElement.id = "colorButton";
+    newColorButtonElement.textContent = colorName;
+
+    newColorButtonElement.addEventListener("click", () => {
+      lineCommandDefault.color = colorName;
+      enableButtons(colorDiv);
+      newColorButtonElement.disabled = true;
+    });
+    colorDiv.appendChild(newColorButtonElement);
+  }
+}
+
+function enableButtons(divElement: HTMLDivElement) {
+  for (const element of divElement.children) {
+    if (element instanceof HTMLButtonElement) {
+      element.disabled = false;
+    }
+  }
+}
+
 //CALLS
 
 canvas.addEventListener("toolMoved", () => reRender(ctx, renderStack));
 
 stickerSetup();
+initiateColorDiv();
