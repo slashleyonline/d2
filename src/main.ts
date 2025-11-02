@@ -333,7 +333,7 @@ function buildCustomStickerButton() {
 }
 
 function addCustomStickerButtonListener(newButton: HTMLButtonElement) {
-  if (newButton.id == "ustomStickerButton") {
+  if (newButton.id == "customStickerButton") {
     newButton.addEventListener("click", () => {
       const newStickerSymbol = prompt("Enter a new symbol for your sticker!");
       const newStickerName = prompt("What is the sticker's name?");
