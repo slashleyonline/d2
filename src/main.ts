@@ -384,8 +384,7 @@ function initiateColorDiv() {
   for (const colorName of colors) {
     const newColorButtonElement = document.createElement("button");
     newColorButtonElement.id = "colorButton";
-    newColorButtonElement.textContent = colorName;
-
+    newColorButtonElement.style.backgroundColor = colorName;
     newColorButtonElement.addEventListener("click", () => {
       lineCommandDefault.color = colorName;
       enableButtons(colorDiv);
